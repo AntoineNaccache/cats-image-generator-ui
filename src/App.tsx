@@ -96,6 +96,7 @@ function App() {
         <h1>Cat Image Generator</h1>
         <button onClick={logout} className="logout">Logout</button>
       </div>
+      <p className="api-url">API: {API_URL}</p>
       <div className="card">
         <input placeholder="Cat name" value={catName} onChange={e => setCatName(e.target.value)} />
         <input placeholder="Age" type="number" value={catAge} onChange={e => setCatAge(e.target.value)} />
