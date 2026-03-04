@@ -68,6 +68,7 @@ function App() {
     return (
       <div className="container">
         <h1>Cat Image Generator</h1>
+        {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
         <div className="card">
           <h2>Login</h2>
           <input
