@@ -11,29 +11,102 @@ body {
   min-height: 100vh;
 }
 
-.container {
-  max-width: 480px;
-  margin: 60px auto;
-  padding: 0 16px;
+/* ── Login ── */
+
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
 }
 
-h1 {
-  font-size: 1.6rem;
-  margin-bottom: 24px;
+.login-box {
+  width: 100%;
+  max-width: 380px;
 }
 
-h2 {
-  font-size: 1.1rem;
-  margin-bottom: 16px;
-  color: #aaa;
+.login-box h1 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
-.header {
+/* ── App shell ── */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #1e1e1e;
 }
+
+.app-header h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backend-dot {
+  font-size: 0.7rem;
+}
+.backend-dot.checking { color: #888; }
+.backend-dot.ok { color: #4ade80; }
+.backend-dot.error { color: #f87171; }
+
+/* ── Tabs ── */
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #1e1e1e;
+  padding: 0 24px;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #777;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  margin-bottom: -1px;
+}
+
+.tabs button:hover {
+  color: #eee;
+  background: none;
+}
+
+.tabs button.active {
+  border-bottom-color: #646cff;
+  color: #eee;
+}
+
+/* ── Main content ── */
+
+.container {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 0 16px;
+  width: 100%;
+}
+
+/* ── Card / form ── */
 
 .card {
   background: #1a1a1a;
@@ -54,6 +127,7 @@ input {
   padding: 10px 12px;
   outline: none;
   transition: border-color 0.15s;
+  width: 100%;
 }
 
 input:focus {
@@ -95,16 +169,76 @@ button.logout:hover {
   color: #eee;
 }
 
-.api-url {
+/* ── Generate view ── */
+
+.cat-image {
+  margin-top: 24px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+}
+
+/* ── Cats grid ── */
+
+.cats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.cat-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.cat-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.cat-card-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.75rem;
   color: #555;
-  margin-bottom: 16px;
+}
+
+.cat-card-info {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cat-card-info strong {
+  font-size: 0.9rem;
+}
+
+.cat-card-info span {
+  font-size: 0.75rem;
+  color: #777;
+}
+
+/* ── Misc ── */
+
+.api-url {
+  font-size: 0.72rem;
+  color: #444;
   word-break: break-all;
 }
 
 .backend-status {
   font-size: 0.8rem;
-  margin-bottom: 16px;
+  margin: 6px 0 12px;
+  text-align: center;
 }
 
 .backend-status.checking { color: #888; }
@@ -116,9 +250,7 @@ button.logout:hover {
   font-size: 0.875rem;
 }
 
-.cat-image {
-  margin-top: 24px;
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #2a2a2a;
+.muted {
+  color: #555;
+  font-size: 0.9rem;
 }
