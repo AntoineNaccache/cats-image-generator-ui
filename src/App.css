@@ -102,6 +102,15 @@ button.logout:hover {
   word-break: break-all;
 }
 
+.backend-status {
+  font-size: 0.8rem;
+  margin-bottom: 16px;
+}
+
+.backend-status.checking { color: #888; }
+.backend-status.ok { color: #4ade80; }
+.backend-status.error { color: #f87171; }
+
 .error {
   color: #f87171;
   font-size: 0.875rem;

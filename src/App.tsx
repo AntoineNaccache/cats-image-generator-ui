@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'ok' | 'error'>('checking')
+
+  useEffect(() => {
+    fetch(`${API_URL}/health`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => setBackendStatus(data.status === 'ok' ? 'ok' : 'error'))
+      .catch(() => setBackendStatus('error'))
+  }, [])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [catName, setCatName] = useState('')
@@ -69,6 +77,9 @@ function App() {
       <div className="container">
         <h1>Cat Image Generator</h1>
         {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
+        <p className={`backend-status ${backendStatus}`}>
+          {backendStatus === 'checking' ? '⬤ Connecting...' : backendStatus === 'ok' ? '⬤ Backend connected' : '⬤ Backend unreachable'}
+        </p>
         <div className="card">
           <h2>Login</h2>
           <input
@@ -98,6 +109,9 @@ function App() {
         <button onClick={logout} className="logout">Logout</button>
       </div>
       {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
+      <p className={`backend-status ${backendStatus}`}>
+        {backendStatus === 'checking' ? '⬤ Connecting...' : backendStatus === 'ok' ? '⬤ Backend connected' : '⬤ Backend unreachable'}
+      </p>
       <div className="card">
         <input placeholder="Cat name" value={catName} onChange={e => setCatName(e.target.value)} />
         <input placeholder="Age" type="number" value={catAge} onChange={e => setCatAge(e.target.value)} />
