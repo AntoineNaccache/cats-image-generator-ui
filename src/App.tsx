@@ -12,38 +12,41 @@ interface Cat {
   created_at: string
 }
 
+type View = 'gallery' | 'login' | 'signup' | 'generate'
+
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
-  const [backendStatus, setBackendStatus] = useState<'checking' | 'ok' | 'error'>('checking')
+  const [view, setView] = useState<View>('gallery')
+  const [cats, setCats] = useState<Cat[]>([])
+  const [catsLoading, setCatsLoading] = useState(false)
+
+  // Login
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+
+  // Signup
+  const [signupUsername, setSignupUsername] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+
+  // Generate
   const [catName, setCatName] = useState('')
   const [catAge, setCatAge] = useState('')
   const [catBreed, setCatBreed] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
-  const [view, setView] = useState<'generate' | 'cats'>('generate')
-  const [cats, setCats] = useState<Cat[]>([])
-  const [catsLoading, setCatsLoading] = useState(false)
+  const [success, setSuccess] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`${API_URL}/health`)
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(data => setBackendStatus(data.status === 'ok' ? 'ok' : 'error'))
-      .catch(() => setBackendStatus('error'))
+    fetchCats()
   }, [])
-
-  useEffect(() => {
-    if (view === 'cats' && token) fetchCats()
-  }, [view])
 
   async function fetchCats() {
     setCatsLoading(true)
     try {
-      const res = await fetch(`${API_URL}/cats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${API_URL}/cats`)
       if (!res.ok) throw new Error()
       setCats(await res.json())
     } catch {
@@ -51,6 +54,12 @@ function App() {
     } finally {
       setCatsLoading(false)
     }
+  }
+
+  function navigate(v: View) {
+    setError(null)
+    setSuccess(null)
+    setView(v)
   }
 
   async function login() {
@@ -65,8 +74,27 @@ function App() {
       const data = await res.json()
       localStorage.setItem('token', data.JsonWebToken)
       setToken(data.JsonWebToken)
+      navigate('gallery')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Login failed')
+    }
+  }
+
+  async function signup() {
+    setError(null)
+    try {
+      const res = await fetch(`${API_URL}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: signupUsername, email: signupEmail, password: signupPassword }),
+      })
+      if (!res.ok) throw new Error('Signup failed')
+      const data = await res.json()
+      localStorage.setItem('token', data.JsonWebToken)
+      setToken(data.JsonWebToken)
+      navigate('gallery')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Signup failed')
     }
   }
 
@@ -90,6 +118,7 @@ function App() {
       const blob = await res.blob()
       if (imageUrl) URL.revokeObjectURL(imageUrl)
       setImageUrl(URL.createObjectURL(blob))
+      fetchCats()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Generation failed')
     } finally {
@@ -100,59 +129,87 @@ function App() {
   function logout() {
     localStorage.removeItem('token')
     setToken(null)
-    setImageUrl(null)
-  }
-
-  if (!token) {
-    return (
-      <div className="login-screen">
-        <div className="login-box">
-          <h1>Cat Image Generator</h1>
-          {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
-          <p className={`backend-status ${backendStatus}`}>
-            {backendStatus === 'checking' ? '⬤ Connecting...' : backendStatus === 'ok' ? '⬤ Backend connected' : '⬤ Backend unreachable'}
-          </p>
-          <div className="card">
-            <input
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && login()}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && login()}
-            />
-            <button onClick={login}>Login</button>
-            {error && <p className="error">{error}</p>}
-          </div>
-        </div>
-      </div>
-    )
+    navigate('gallery')
   }
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Cat Image Generator</h1>
-        <div className="header-right">
-          {!import.meta.env.PROD && <span className="api-url">API: {API_URL}</span>}
-          <span className={`backend-dot ${backendStatus}`} title={backendStatus === 'ok' ? 'Backend connected' : 'Backend unreachable'}>⬤</span>
-          <button onClick={logout} className="logout">Logout</button>
-        </div>
+        <h1 className="logo" onClick={() => navigate('gallery')}>Cat Image Generator</h1>
+        <nav>
+          {token ? (
+            <>
+              <button className="nav-btn" onClick={() => navigate('generate')}>Generate</button>
+              <button className="nav-btn outline" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button className="nav-btn outline" onClick={() => navigate('login')}>Login</button>
+              <button className="nav-btn" onClick={() => navigate('signup')}>Sign Up</button>
+            </>
+          )}
+        </nav>
       </header>
 
-      <nav className="tabs">
-        <button className={view === 'generate' ? 'active' : ''} onClick={() => setView('generate')}>Generate</button>
-        <button className={view === 'cats' ? 'active' : ''} onClick={() => setView('cats')}>All Cats</button>
-      </nav>
+      <main>
+        {view === 'gallery' && (
+          <div className="container">
+            {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
+            <h2 className="section-title">All Cats</h2>
+            {catsLoading && <p className="muted">Loading...</p>}
+            {!catsLoading && cats.length === 0 && <p className="muted">No cats yet.</p>}
+            <div className="cats-grid">
+              {cats.map(cat => (
+                <div key={cat.id} className="cat-card">
+                  {cat.image_path
+                    ? <img src={cat.image_path} alt={cat.name} />
+                    : <div className="cat-card-placeholder">No image</div>
+                  }
+                  <div className="cat-card-info">
+                    <strong>{cat.name}</strong>
+                    <span>{cat.breed}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-      <main className="container">
+        {view === 'login' && (
+          <div className="auth-screen">
+            <div className="auth-box">
+              <h2>Login</h2>
+              <div className="card">
+                <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />
+                <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />
+                <button onClick={login}>Login</button>
+                {error && <p className="error">{error}</p>}
+              </div>
+              <p className="auth-switch">Don't have an account? <span onClick={() => navigate('signup')}>Sign up</span></p>
+            </div>
+          </div>
+        )}
+
+        {view === 'signup' && (
+          <div className="auth-screen">
+            <div className="auth-box">
+              <h2>Create account</h2>
+              <div className="card">
+                <input placeholder="Username" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} />
+                <input placeholder="Email" type="email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)} />
+                <input type="password" placeholder="Password" value={signupPassword} onChange={e => setSignupPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && signup()} />
+                <button onClick={signup}>Create account</button>
+                {error && <p className="error">{error}</p>}
+                {success && <p className="success">{success}</p>}
+              </div>
+              <p className="auth-switch">Already have an account? <span onClick={() => navigate('login')}>Login</span></p>
+            </div>
+          </div>
+        )}
+
         {view === 'generate' && (
-          <>
+          <div className="container">
+            <h2 className="section-title">Generate a Cat</h2>
             <div className="card">
               <input placeholder="Cat name" value={catName} onChange={e => setCatName(e.target.value)} />
               <input placeholder="Age" type="number" value={catAge} onChange={e => setCatAge(e.target.value)} />
@@ -163,25 +220,6 @@ function App() {
               {error && <p className="error">{error}</p>}
             </div>
             {imageUrl && <img src={imageUrl} alt="Generated cat" className="cat-image" />}
-          </>
-        )}
-
-        {view === 'cats' && (
-          <div className="cats-grid">
-            {catsLoading && <p className="muted">Loading...</p>}
-            {!catsLoading && cats.length === 0 && <p className="muted">No cats yet.</p>}
-            {cats.map(cat => (
-              <div key={cat.id} className="cat-card">
-                {cat.image_path
-                  ? <img src={cat.image_path} alt={cat.name} />
-                  : <div className="cat-card-placeholder">No image</div>
-                }
-                <div className="cat-card-info">
-                  <strong>{cat.name}</strong>
-                  <span>{cat.breed} · {cat.age}y</span>
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </main>
