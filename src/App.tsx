@@ -153,24 +153,57 @@ function App() {
 
       <main>
         {view === 'gallery' && (
-          <div className="container">
-            {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
-            <h2 className="section-title">All Cats</h2>
-            {catsLoading && <p className="muted">Loading...</p>}
-            {!catsLoading && cats.length === 0 && <p className="muted">No cats yet.</p>}
-            <div className="cats-grid">
-              {cats.map(cat => (
-                <div key={cat.id} className="cat-card">
-                  {cat.image_path
-                    ? <img src={cat.image_path} alt={cat.name} />
-                    : <div className="cat-card-placeholder">No image</div>
-                  }
-                  <div className="cat-card-info">
-                    <strong>{cat.name}</strong>
-                    <span>{cat.breed}</span>
-                  </div>
+          <div>
+            <div className="hero">
+              <h2 className="hero-title">AI-Generated Cats</h2>
+              <p className="hero-subtitle">A collection of unique cats conjured by artificial intelligence.</p>
+            </div>
+            <div className="container" style={{ paddingTop: 0 }}>
+              {!import.meta.env.PROD && <p className="api-url">API: {API_URL}</p>}
+              <div className="section-header">
+                <span className="section-title">All Cats</span>
+                {!catsLoading && cats.length > 0 && (
+                  <span className="cats-count">{cats.length}</span>
+                )}
+              </div>
+              {catsLoading ? (
+                <div className="cats-grid">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="cat-card">
+                      <div className="skeleton-img skeleton" />
+                      <div className="cat-card-info">
+                        <div className="skeleton-line skeleton" />
+                        <div className="skeleton-line short skeleton" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : cats.length === 0 ? (
+                <div className="empty-state">
+                  <span className="big-emoji">🐱</span>
+                  <p>No cats yet. Log in and generate the first one!</p>
+                  {!token && (
+                    <button onClick={() => navigate('signup')}>Get started</button>
+                  )}
+                </div>
+              ) : (
+                <div className="cats-grid">
+                  {cats.map(cat => (
+                    <div key={cat.id} className="cat-card">
+                      <div className="cat-card-img-wrapper">
+                        {cat.image_path
+                          ? <img src={cat.image_path} alt={cat.name} />
+                          : <div className="cat-card-placeholder">🐱</div>
+                        }
+                      </div>
+                      <div className="cat-card-info">
+                        <strong>{cat.name}</strong>
+                        <span>{cat.breed} · {cat.age}y</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -178,7 +211,8 @@ function App() {
         {view === 'login' && (
           <div className="auth-screen">
             <div className="auth-box">
-              <h2>Login</h2>
+              <div className="auth-icon">🐾</div>
+              <h2>Welcome back</h2>
               <div className="card">
                 <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />
                 <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />
@@ -193,6 +227,7 @@ function App() {
         {view === 'signup' && (
           <div className="auth-screen">
             <div className="auth-box">
+              <div className="auth-icon">🐱</div>
               <h2>Create account</h2>
               <div className="card">
                 <input placeholder="Username" value={signupUsername} onChange={e => setSignupUsername(e.target.value)} />
@@ -209,17 +244,30 @@ function App() {
 
         {view === 'generate' && (
           <div className="container">
-            <h2 className="section-title">Generate a Cat</h2>
-            <div className="card">
-              <input placeholder="Cat name" value={catName} onChange={e => setCatName(e.target.value)} />
-              <input placeholder="Age" type="number" value={catAge} onChange={e => setCatAge(e.target.value)} />
-              <input placeholder="Breed" value={catBreed} onChange={e => setCatBreed(e.target.value)} />
-              <button onClick={generateImage} disabled={loading}>
-                {loading ? 'Generating...' : 'Generate Cat Image'}
-              </button>
-              {error && <p className="error">{error}</p>}
+            <div className="section-header" style={{ marginBottom: 24 }}>
+              <span className="section-title">Generate a Cat</span>
             </div>
-            {imageUrl && <img src={imageUrl} alt="Generated cat" className="cat-image" />}
+            <div className="generate-layout">
+              <div className="card">
+                <input placeholder="Name (e.g. Whiskers)" value={catName} onChange={e => setCatName(e.target.value)} />
+                <input placeholder="Age (e.g. 2)" type="number" value={catAge} onChange={e => setCatAge(e.target.value)} />
+                <input placeholder="Breed (e.g. Persian)" value={catBreed} onChange={e => setCatBreed(e.target.value)} />
+                <button onClick={generateImage} disabled={loading}>
+                  {loading ? 'Generating…' : 'Generate Cat Image'}
+                </button>
+                {error && <p className="error">{error}</p>}
+              </div>
+              <div>
+                {imageUrl ? (
+                  <img src={imageUrl} alt="Generated cat" className="cat-image" />
+                ) : (
+                  <div className="cat-image-placeholder">
+                    <span className="big-emoji">🐾</span>
+                    <span>Your cat will appear here</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </main>
