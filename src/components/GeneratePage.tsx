@@ -31,7 +31,14 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
           breed: catBreed || 'Persian',
         }),
       })
-      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      if (!res.ok) {
+        const messages: Record<number, string> = {
+          401: 'Session expired — please log in again.',
+          403: 'You do not have permission to generate cats.',
+          429: 'Rate limit reached. Please wait a minute and try again.',
+        }
+        throw new Error(messages[res.status] ?? `Generation failed (${res.status})`)
+      }
       const blob = await res.blob()
       if (imageUrl) URL.revokeObjectURL(imageUrl)
       setImageUrl(URL.createObjectURL(blob))
