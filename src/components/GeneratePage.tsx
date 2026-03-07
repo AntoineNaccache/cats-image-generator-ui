@@ -35,7 +35,7 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
         const messages: Record<number, string> = {
           401: 'Session expired — please log in again.',
           403: 'You do not have permission to generate cats.',
-          429: 'Rate limit reached. Please wait a minute and try again.',
+          429: 'Daily limit reached. You can generate one image per day.',
         }
         throw new Error(messages[res.status] ?? `Generation failed (${res.status})`)
       }

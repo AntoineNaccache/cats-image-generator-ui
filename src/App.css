@@ -431,6 +431,9 @@ input:focus {
   justify-content: center;
   font-size: 2.5rem;
 }
+.cat-placeholder.hidden {
+  display: none;
+}
 
 /* ── Hover overlay ── */
 .cat-overlay {

@@ -55,10 +55,17 @@ export function GalleryPage({ cats, loading, token, onNavigate }: GalleryPagePro
               <div key={cat.id} className="cat-card">
                 <div className="cat-img-wrapper">
                   {cat.image_path ? (
-                    <img src={cat.image_path} alt={cat.name} loading="lazy" />
-                  ) : (
-                    <div className="cat-placeholder">🐱</div>
-                  )}
+                    <img
+                      src={cat.image_path}
+                      alt={cat.name}
+                      loading="lazy"
+                      onError={e => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`cat-placeholder${cat.image_path ? ' hidden' : ''}`}>🐱</div>
                   <div className="cat-overlay">
                     <strong className="overlay-name">{cat.name}</strong>
                     <span className="overlay-meta">
