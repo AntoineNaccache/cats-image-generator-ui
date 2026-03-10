@@ -170,6 +170,27 @@
   transform: translateY(0);
 }
 
+.mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mode-toggle .btn {
+  flex: 1;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1.5px solid var(--border-hover);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
 .btn-outline {
   background: transparent;
   border: 1.5px solid var(--border-hover);
