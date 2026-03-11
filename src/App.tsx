@@ -1,34 +1,103 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
 import './App.css'
+import { Navbar } from './components/Navbar'
+import { GalleryPage } from './components/GalleryPage'
+import { GeneratePage } from './components/GeneratePage'
+import { AuthPage } from './components/AuthPage'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
+export interface Cat {
+  id: string
+  name: string
+  age: number
+  breed: string
+  image_path?: string
+  created_at: string
+}
+
+export type View = 'gallery' | 'login' | 'signup' | 'generate'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
+  const [view, setView] = useState<View>('gallery')
+  const [cats, setCats] = useState<Cat[]>([])
+  const [catsLoading, setCatsLoading] = useState(false)
+
+  useEffect(() => {
+    fetchCats()
+  }, [])
+
+  async function fetchCats() {
+    setCatsLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/cats`)
+      if (!res.ok) throw new Error()
+      setCats(await res.json())
+    } catch {
+      setCats([])
+    } finally {
+      setCatsLoading(false)
+    }
+  }
+
+  function navigate(v: View) {
+    setView(v)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleAuthSuccess(jwt: string) {
+    localStorage.setItem('token', jwt)
+    setToken(jwt)
+    navigate('gallery')
+  }
+
+  function logout() {
+    localStorage.removeItem('token')
+    setToken(null)
+    navigate('gallery')
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="app">
+      <Navbar
+        token={token}
+        currentView={view}
+        onNavigate={navigate}
+        onLogout={logout}
+      />
+
+      <main className="main">
+        {view === 'gallery' && (
+          <GalleryPage
+            cats={cats}
+            loading={catsLoading}
+            token={token}
+            onNavigate={navigate}
+          />
+        )}
+
+        {view === 'login' && (
+          <AuthPage
+            mode="login"
+            onSuccess={handleAuthSuccess}
+            onSwitch={() => navigate('signup')}
+          />
+        )}
+
+        {view === 'signup' && (
+          <AuthPage
+            mode="signup"
+            onSuccess={handleAuthSuccess}
+            onSwitch={() => navigate('login')}
+          />
+        )}
+
+        {view === 'generate' && token && (
+          <GeneratePage token={token} onGenerated={fetchCats} />
+        )}
+      </main>
+    </div>
   )
 }
 
