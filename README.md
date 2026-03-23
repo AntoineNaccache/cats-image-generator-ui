@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# CatGen UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for CatGen — an AI-powered cat image generator. Browse the community gallery of AI-generated cats or generate your own renaissance portrait.
 
-Currently, two official plugins are available:
+**Live demo:** https://cats-image-generator-ui.vercel.app
+**Backend repo:** https://github.com/naccacheantoine/cats-image-generator
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## React Compiler
+- **Framework:** React 19 + TypeScript + Vite 7
+- **Styling:** Custom CSS (no UI library)
+- **Deployment:** Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Gallery** — masonry grid of all community-generated cats, with hover overlay showing cat name, breed, and age
+- **Generate** — authenticated users can generate one renaissance portrait cat per day; the AI picks a Met Museum painting and renders the cat in that painting's style
+- **Auth** — signup/login with JWT stored in localStorage, passed as Bearer token to the API
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env   # set VITE_API_URL to your backend URL
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```
+VITE_API_URL=https://cats-image-generator.vercel.app
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Without this variable the app falls back to `http://localhost:3000`.
+
+## Project Structure
+
+```
+src/
+  App.tsx              # router and global state (token, cats, active view)
+  components/
+    Navbar.tsx         # navigation and auth state display
+    GalleryPage.tsx    # masonry cat gallery
+    GeneratePage.tsx   # generation form and result display
+    AuthPage.tsx       # login and signup forms
 ```
