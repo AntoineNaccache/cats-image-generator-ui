@@ -216,6 +216,24 @@
   box-shadow: none;
 }
 
+.btn-google {
+  background: #fff;
+  border: 1.5px solid var(--border-hover);
+  color: var(--text);
+  gap: 10px;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-google:hover:not(:disabled) {
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
 .btn-lg {
   font-size: 0.95rem;
   padding: 12px 24px;

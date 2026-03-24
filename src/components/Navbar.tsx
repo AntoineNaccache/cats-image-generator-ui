@@ -39,14 +39,9 @@ export function Navbar({ token, currentView, onNavigate, onLogout }: NavbarProps
             Logout
           </button>
         ) : (
-          <>
-            <button className="btn btn-ghost" onClick={() => onNavigate('login')}>
-              Login
-            </button>
-            <button className="btn btn-primary" onClick={() => onNavigate('signup')}>
-              Sign Up
-            </button>
-          </>
+          <button className="btn btn-primary" onClick={() => onNavigate('login')}>
+            Sign In
+          </button>
         )}
       </div>
     </header>

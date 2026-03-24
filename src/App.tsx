@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import { supabase } from './lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 import { Navbar } from './components/Navbar'
 import { GalleryPage } from './components/GalleryPage'
 import { GeneratePage } from './components/GeneratePage'
@@ -16,16 +18,24 @@ export interface Cat {
   created_at: string
 }
 
-export type View = 'gallery' | 'login' | 'signup' | 'generate'
+export type View = 'gallery' | 'login' | 'generate'
 
 function App() {
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
+  const [session, setSession] = useState<Session | null>(null)
   const [view, setView] = useState<View>('gallery')
   const [cats, setCats] = useState<Cat[]>([])
   const [catsLoading, setCatsLoading] = useState(false)
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (session) navigate('gallery')
+    })
+
     fetchCats()
+    return () => subscription.unsubscribe()
   }, [])
 
   async function fetchCats() {
@@ -46,17 +56,13 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  function handleAuthSuccess(jwt: string) {
-    localStorage.setItem('token', jwt)
-    setToken(jwt)
+  async function logout() {
+    await supabase.auth.signOut()
+    setSession(null)
     navigate('gallery')
   }
 
-  function logout() {
-    localStorage.removeItem('token')
-    setToken(null)
-    navigate('gallery')
-  }
+  const token = session?.access_token ?? null
 
   return (
     <div className="app">
@@ -78,19 +84,7 @@ function App() {
         )}
 
         {view === 'login' && (
-          <AuthPage
-            mode="login"
-            onSuccess={handleAuthSuccess}
-            onSwitch={() => navigate('signup')}
-          />
-        )}
-
-        {view === 'signup' && (
-          <AuthPage
-            mode="signup"
-            onSuccess={handleAuthSuccess}
-            onSwitch={() => navigate('login')}
-          />
+          <AuthPage />
         )}
 
         {view === 'generate' && token && (
