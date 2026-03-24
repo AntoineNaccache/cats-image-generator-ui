@@ -17,7 +17,7 @@ export function GalleryPage({ cats, loading, token, onNavigate }: GalleryPagePro
           Unique cats conjured by artificial intelligence, one prompt at a time.
         </p>
         {!token && (
-          <button className="btn btn-primary hero-cta" onClick={() => onNavigate('signup')}>
+          <button className="btn btn-primary hero-cta" onClick={() => onNavigate('login')}>
             Generate your cat →
           </button>
         )}
@@ -44,7 +44,7 @@ export function GalleryPage({ cats, loading, token, onNavigate }: GalleryPagePro
             <span className="empty-emoji">🐾</span>
             <p>No cats yet! Be the first to generate one.</p>
             {!token && (
-              <button className="btn btn-primary" onClick={() => onNavigate('signup')}>
+              <button className="btn btn-primary" onClick={() => onNavigate('login')}>
                 Get started
               </button>
             )}
