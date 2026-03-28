@@ -16,6 +16,7 @@ export interface Cat {
   breed: string
   image_path?: string
   created_at: string
+  likes_count?: number
 }
 
 export type View = 'gallery' | 'login' | 'generate'
@@ -25,13 +26,22 @@ function App() {
   const [view, setView] = useState<View>('gallery')
   const [cats, setCats] = useState<Cat[]>([])
   const [catsLoading, setCatsLoading] = useState(false)
+  const [likedCatIds, setLikedCatIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      if (session?.access_token) fetchMyLikes(session.access_token)
+    })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session) navigate('gallery')
+      if (session) {
+        navigate('gallery')
+        fetchMyLikes(session.access_token)
+      } else {
+        setLikedCatIds(new Set())
+      }
     })
 
     fetchCats()
@@ -48,6 +58,41 @@ function App() {
       setCats([])
     } finally {
       setCatsLoading(false)
+    }
+  }
+
+  async function fetchMyLikes(token: string) {
+    try {
+      const res = await fetch(`${API_URL}/cats/my-likes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const ids: string[] = await res.json()
+      setLikedCatIds(new Set(ids))
+    } catch {
+      // silently ignore
+    }
+  }
+
+  async function handleLike(catId: string) {
+    const token = session?.access_token
+    if (!token) return
+    try {
+      const res = await fetch(`${API_URL}/cats/${catId}/like`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const { liked, likes_count }: { liked: boolean; likes_count: number } = await res.json()
+      setLikedCatIds(prev => {
+        const next = new Set(prev)
+        if (liked) next.add(catId)
+        else next.delete(catId)
+        return next
+      })
+      setCats(prev => prev.map(c => c.id === catId ? { ...c, likes_count } : c))
+    } catch {
+      // silently ignore
     }
   }
 
@@ -79,6 +124,8 @@ function App() {
             cats={cats}
             loading={catsLoading}
             token={token}
+            likedCatIds={likedCatIds}
+            onLike={handleLike}
             onNavigate={navigate}
           />
         )}
