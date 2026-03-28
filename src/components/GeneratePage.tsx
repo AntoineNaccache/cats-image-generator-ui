@@ -21,9 +21,7 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
   const [mode, setMode] = useState<Mode>('renaissance')
   const [phase, setPhase] = useState<Phase>('idle')
   const [generatedCat, setGeneratedCat] = useState<GeneratedCat | null>(null)
-  const [fruitImageUrl, setFruitImageUrl] = useState<string | null>(null)
   const [catName, setCatName] = useState('')
-  const [fruitForm, setFruitForm] = useState({ name: '', age: '', breed: '' })
   const [finalName, setFinalName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -53,36 +51,23 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
   }
 
   async function generateFruit() {
-    const age = parseInt(fruitForm.age)
-    if (!fruitForm.name.trim() || !fruitForm.breed.trim() || isNaN(age) || age < 0) {
-      setError('Please fill in all fields with valid values.')
-      return
-    }
     setPhase('generating')
     setError(null)
     try {
       const res = await fetch(`${API_URL}/cats/generate/fruit`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: fruitForm.name.trim(), age, breed: fruitForm.breed.trim() }),
+        headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) {
         const messages: Record<number, string> = {
           401: 'Session expired — please log in again.',
-          403: 'Admin access required to generate fruit cats.',
           429: 'Too many requests. Please wait a moment.',
         }
         throw new Error(messages[res.status] ?? `Generation failed (${res.status})`)
       }
-      const blob = await res.blob()
-      if (fruitImageUrl) URL.revokeObjectURL(fruitImageUrl)
-      setFruitImageUrl(URL.createObjectURL(blob))
-      setFinalName(fruitForm.name.trim())
-      setPhase('done')
-      onGenerated()
+      const data: GeneratedCat = await res.json()
+      setGeneratedCat(data)
+      setPhase('naming')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Generation failed')
       setPhase('idle')
@@ -117,17 +102,12 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
     setPhase('idle')
     setGeneratedCat(null)
     setCatName('')
-    setFruitForm({ name: '', age: '', breed: '' })
     setFinalName('')
     setError(null)
-    if (fruitImageUrl) {
-      URL.revokeObjectURL(fruitImageUrl)
-      setFruitImageUrl(null)
-    }
   }
 
   const isIdle = phase === 'idle'
-  const previewImageUrl = mode === 'fruit' ? fruitImageUrl : generatedCat?.imageUrl
+  const previewImageUrl = generatedCat?.imageUrl
 
   return (
     <div className="generate-page">
@@ -135,7 +115,7 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
         <h1 className="generate-title">Generate a Cat</h1>
         <p className="generate-subtitle">
           {phase === 'idle' && mode === 'renaissance' && 'Let AI paint your cat as a Renaissance portrait.'}
-          {phase === 'idle' && mode === 'fruit' && 'Let AI create a fruity cat (admin only).'}
+          {phase === 'idle' && mode === 'fruit' && 'Let AI conjure a random fruity cat for you.'}
           {phase === 'generating' && mode === 'renaissance' && 'Consulting the Renaissance masters…'}
           {phase === 'generating' && mode === 'fruit' && 'Conjuring the fruit cat…'}
           {(phase === 'naming' || phase === 'saving') && 'Your portrait is ready! Name your cat, or leave it empty for a surprise.'}
@@ -169,37 +149,9 @@ export function GeneratePage({ token, onGenerated }: GeneratePageProps) {
           )}
 
           {isIdle && mode === 'fruit' && (
-            <>
-              <label className="field-label">
-                Name
-                <input
-                  placeholder="e.g. Mango"
-                  value={fruitForm.name}
-                  onChange={e => setFruitForm(f => ({ ...f, name: e.target.value }))}
-                />
-              </label>
-              <label className="field-label">
-                Age
-                <input
-                  type="number"
-                  placeholder="e.g. 3"
-                  min={0}
-                  value={fruitForm.age}
-                  onChange={e => setFruitForm(f => ({ ...f, age: e.target.value }))}
-                />
-              </label>
-              <label className="field-label">
-                Breed
-                <input
-                  placeholder="e.g. Persian"
-                  value={fruitForm.breed}
-                  onChange={e => setFruitForm(f => ({ ...f, breed: e.target.value }))}
-                />
-              </label>
-              <button className="btn btn-primary btn-lg" onClick={generateFruit}>
-                🍉 Generate Fruit Cat
-              </button>
-            </>
+            <button className="btn btn-primary btn-lg" onClick={generateFruit}>
+              🍉 Generate Fruit Cat
+            </button>
           )}
 
           {phase === 'generating' && (

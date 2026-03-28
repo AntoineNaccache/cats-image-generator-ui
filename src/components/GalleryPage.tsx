@@ -4,10 +4,12 @@ interface GalleryPageProps {
   cats: Cat[]
   loading: boolean
   token: string | null
+  likedCatIds: Set<string>
+  onLike: (catId: string) => void
   onNavigate: (v: View) => void
 }
 
-export function GalleryPage({ cats, loading, token, onNavigate }: GalleryPageProps) {
+export function GalleryPage({ cats, loading, token, likedCatIds, onLike, onNavigate }: GalleryPageProps) {
   return (
     <div className="gallery-page">
       <div className="hero">
@@ -71,6 +73,14 @@ export function GalleryPage({ cats, loading, token, onNavigate }: GalleryPagePro
                     <span className="overlay-meta">
                       {cat.breed} · {cat.age}y
                     </span>
+                    <button
+                      className={`like-btn${likedCatIds.has(cat.id) ? ' liked' : ''}`}
+                      onClick={e => { e.stopPropagation(); token ? onLike(cat.id) : onNavigate('login') }}
+                      title={token ? (likedCatIds.has(cat.id) ? 'Unlike' : 'Like') : 'Sign in to like'}
+                    >
+                      <span className="like-icon">{likedCatIds.has(cat.id) ? '♥' : '♡'}</span>
+                      <span className="like-count">{cat.likes_count ?? 0}</span>
+                    </button>
                   </div>
                 </div>
               </div>

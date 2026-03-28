@@ -514,6 +514,46 @@ input:focus {
   font-weight: 500;
 }
 
+/* ── Like button ── */
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: background var(--transition), transform var(--transition);
+  box-shadow: none;
+}
+
+.like-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.06);
+  box-shadow: none;
+}
+
+.like-btn.liked {
+  background: rgba(236, 72, 153, 0.55);
+  border-color: rgba(236, 72, 153, 0.7);
+  color: #fff;
+}
+
+.like-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.like-count {
+  line-height: 1;
+}
+
 /* ── Skeleton loading ── */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
